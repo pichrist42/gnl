@@ -6,69 +6,81 @@
 /*   By: pichrist <pichrist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/08/18 15:45:49 by pichrist          #+#    #+#             */
-/*   Updated: 2017/08/21 17:49:46 by pichrist         ###   ########.fr       */
+/*   Updated: 2017/08/28 00:00:40 by pichrist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-static void	debug(char *msg, int disp_err){
-	if (disp_err)
-		ft_putendl(msg);
-}
-
-int			get_next_line(const int fd, char **line, int disp_err)
+int				get_next_line(const int fd, char **line)
 {
-	static char	*content = NULL;
-	char		buffer[BUFF_SIZE + 1];
-	int			c;
+	static t_mem	*first = NULL;
+	t_mem			*item;
+	char			buffer[BUFF_SIZE + 1];
+	int				c;
 
-	if (fd < 0 || !line)
-		return (-1);
 	if (!BUFF_SIZE)
 		return (0);
+	if (fd < 0 || !line ||
+		(first == NULL && !(first = alloc_item(fd, ft_strnew(1)))))
+		return (-1);
+	item = first;
+	while (item->next && item->fd != fd)
+		item = item->next;
+	if (item->fd != fd)
+	{
+		item->next = alloc_item(fd, ft_strnew(1));
+		item = item->next;
+	}
 	while (c = read(fd, buffer, BUFF_SIZE))
 	{
 		if (c == -1)
 			return (-1);
 		buffer[c] = '\0';
-		if (content)
-			add_buffer(&content, buffer);
-		else
-			content = ft_strdup(buffer);
+		add_buffer(item, buffer);
 	}
-	return (result(&content, line, disp_err));
+	return (result(item, line));
 }
 
-static void	add_buffer(char **content, char *buffer)
+static t_mem	*alloc_item(int fd, char *str)
+{
+	t_mem	*item;
+
+	if (!(item = (t_mem*)malloc(sizeof(t_mem))))
+		return (NULL);
+	item->data = str;
+	item->fd = fd;
+	item->next = NULL;
+	return (item);
+}
+
+static void		add_buffer(t_mem *item, char *buffer)
 {
 	char *tmp;
 
-	tmp = ft_strdup(*content);
-	ft_memdel((void**)content);
-	*content = ft_strjoin(tmp, buffer);
+	tmp = ft_strdup(item->data);
+	free(item->data);
+	item->data = ft_strjoin(tmp, buffer);
 	free(tmp);
 	tmp = NULL;
-	// ft_strclr(buffer);
 }
 
-static int	result(char **content, char **line, int disp_err)
+static int		result(t_mem *item, char **line)
 {
 	char *tmp;
 
-	if (!*content || !*content[0])
+	if (!item->data || !item->data[0])
 		return (0);
-	else if ((tmp = ft_strchr(*content, '\n')))
+	else if ((tmp = ft_strchr(item->data, '\n')))
 	{
-		*line = ft_strdupu(*content, "\n");
-		ft_memmove(*content, tmp + 1, ft_strlen(tmp));
+		*line = ft_strdupu(item->data, "\n");
+		ft_memmove(item->data, tmp + 1, ft_strlen(tmp));
 	}
 	else
 	{
-		*line = *content;
-		// *content = NULL;
-		ft_strclr(*content);
-		ft_putendl(*line);
+		*line = item->data;
+		item->data = NULL;
+		ft_strclr(item->data);
 	}
 	return (1);
 }

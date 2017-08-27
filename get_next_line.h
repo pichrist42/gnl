@@ -6,7 +6,7 @@
 /*   By: pichrist <pichrist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/04/23 20:35:13 by pichrist          #+#    #+#             */
-/*   Updated: 2017/08/21 16:37:34 by pichrist         ###   ########.fr       */
+/*   Updated: 2017/08/27 22:53:40 by pichrist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,9 @@ typedef struct		s_mem
 	struct s_mem	*next;
 }					t_mem;
 
-int			get_next_line(const int fd, char **line, int disperr);
-static void	add_buffer(char **content, char *buffer);
-static int	result(char **content, char **line, int disp_err);
+int				get_next_line(const int fd, char **line);
+static t_mem	*alloc_item(int fd, char *str);
+static void		add_buffer(t_mem *item, char *buffer);
+static int		result(t_mem *item, char **line);
 
 #endif
