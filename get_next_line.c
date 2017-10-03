@@ -1,18 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   gnl.c                                              :+:      :+:    :+:   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: pichrist <pichrist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/08/18 15:45:49 by pichrist          #+#    #+#             */
-/*   Updated: 2017/08/28 00:00:40 by pichrist         ###   ########.fr       */
+/*   Updated: 2017/10/03 11:23:52 by pichrist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-int				get_next_line(const int fd, char **line)
+int		get_next_line(const int fd, char **line)
 {
 	static t_mem	*first = NULL;
 	t_mem			*item;
@@ -24,15 +24,8 @@ int				get_next_line(const int fd, char **line)
 	if (fd < 0 || !line ||
 		(first == NULL && !(first = alloc_item(fd, ft_strnew(1)))))
 		return (-1);
-	item = first;
-	while (item->next && item->fd != fd)
-		item = item->next;
-	if (item->fd != fd)
-	{
-		item->next = alloc_item(fd, ft_strnew(1));
-		item = item->next;
-	}
-	while (c = read(fd, buffer, BUFF_SIZE))
+	item = check_item_fd(first, fd);
+	while ((c = read(fd, buffer, BUFF_SIZE)))
 	{
 		if (c == -1)
 			return (-1);
@@ -42,7 +35,19 @@ int				get_next_line(const int fd, char **line)
 	return (result(item, line));
 }
 
-static t_mem	*alloc_item(int fd, char *str)
+t_mem	*check_item_fd(t_mem *item, int fd)
+{
+	while (item->next && item->fd != fd)
+		item = item->next;
+	if (item->fd != fd)
+	{
+		item->next = alloc_item(fd, ft_strnew(1));
+		item = item->next;
+	}
+	return (item);
+}
+
+t_mem	*alloc_item(int fd, char *str)
 {
 	t_mem	*item;
 
@@ -54,7 +59,7 @@ static t_mem	*alloc_item(int fd, char *str)
 	return (item);
 }
 
-static void		add_buffer(t_mem *item, char *buffer)
+void	add_buffer(t_mem *item, char *buffer)
 {
 	char *tmp;
 
@@ -65,7 +70,7 @@ static void		add_buffer(t_mem *item, char *buffer)
 	tmp = NULL;
 }
 
-static int		result(t_mem *item, char **line)
+int		result(t_mem *item, char **line)
 {
 	char *tmp;
 

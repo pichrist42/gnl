@@ -6,7 +6,7 @@
 /*   By: pichrist <pichrist@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/04/23 20:35:13 by pichrist          #+#    #+#             */
-/*   Updated: 2017/08/27 22:53:40 by pichrist         ###   ########.fr       */
+/*   Updated: 2017/10/03 11:23:47 by pichrist         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,6 @@
 # include <stdlib.h>
 # include <fcntl.h>
 
-#include <stdio.h>
-#include <errno.h>
-#include <string.h>
-#include <assert.h>
-
 typedef struct		s_mem
 {
 	char			*data;
@@ -31,9 +26,10 @@ typedef struct		s_mem
 	struct s_mem	*next;
 }					t_mem;
 
-int				get_next_line(const int fd, char **line);
-static t_mem	*alloc_item(int fd, char *str);
-static void		add_buffer(t_mem *item, char *buffer);
-static int		result(t_mem *item, char **line);
+int					get_next_line(const int fd, char **line);
+t_mem				*check_item_fd(t_mem *item, int fd);
+t_mem				*alloc_item(int fd, char *str);
+void				add_buffer(t_mem *item, char *buffer);
+int					result(t_mem *item, char **line);
 
 #endif
